@@ -359,8 +359,21 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../index.html'));
 });
 
-server.listen(PORT, () => {
-  console.log(`✨ Royal Rift Server running on http://localhost:${PORT}`);
-});
+// Reset stale online player states on startup
+(async () => {
+  try {
+    await dbRun(`
+      UPDATE online_players
+      SET status = 'idle', in_battle = 0, opponent_id = NULL
+    `);
+    console.log('✅ Reset stale online player states on startup');
+  } catch (error) {
+    console.error('❌ Failed to reset online player states on startup:', error);
+  }
+
+  server.listen(PORT, () => {
+    console.log(`✨ Royal Rift Server running on http://localhost:${PORT}`);
+  });
+})();
 
 module.exports = { app, server, io };
