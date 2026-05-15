@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Royal Rift Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hud glass">
+      <div class="crown-side enemy">
+        <p>Enemy King Tower</p>
+        <strong id="enemyHp">4200</strong>
+      </div>
+
+      <div class="center-status">
+        <h1>Royal Rift Arena</h1>
+        <p class="subtitle">Fast lane duels • Destroy the crown tower • Difficulty: <strong id="difficultyLabel">Easy</strong></p>
+        <div class="battle-meta">
+          <span class="pill">Overtime in <strong id="timer">2:30</strong></span>
+          <span class="pill">Selected: <strong id="selectedCardLabel">None</strong></span>
+          <span class="pill challenge-pill">Win Streak: <strong id="streakValue">0 / 5</strong></span>
+          <span class="pill">Wins: <strong id="totalWins">0</strong></span>
+          <span class="pill">Unlocked: <strong id="unlockedCount">0 / 0</strong></span>
+          <span class="pill">Gold: <strong id="goldValue">0</strong></span>
+          <label class="pill difficulty-pill" for="difficultySelect">Difficulty
+            <select id="difficultySelect" aria-label="Select difficulty">
+              <option value="0">Easy</option>
+              <option value="1">Medium</option>
+              <option value="2">Hard</option>
+              <option value="3">Extreme</option>
+              <option value="4">Impossible</option>
+            </select>
+          </label>
+          <label class="pill difficulty-pill" for="aiModeSelect">AI Mode
+            <select id="aiModeSelect" aria-label="Select AI mode">
+              <option value="aggressive">Aggressive</option>
+              <option value="defensive">Defensive</option>
+              <option value="split">Split</option>
+            </select>
+          </label>
+          <button id="musicToggle" class="pill music-toggle" type="button" aria-label="Toggle music">▶ Music</button>
+          <button id="resetProgressBtn" class="pill danger" type="button">Reset Progress</button>
+          <button id="leaderboardBtn" class="pill" type="button" onclick="showLeaderboard()">🏆 Leaderboard</button>
+          <button id="playerProfileBtn" class="pill" type="button" onclick="logoutPlayer()" title="Click to logout">👤 Login</button>
+        </div>
+      </div>
+
+      <div class="crown-side player">
+        <p>Your King Tower</p>
+        <strong id="playerHp">4200</strong>
+      </div>
+    </header>
+
+    <nav class="tab-nav glass" aria-label="Main sections">
+      <button class="tab-btn active" data-tab-target="battle" type="button">Battle</button>
+      <button class="tab-btn" data-tab-target="cards" type="button">Cards + Deck Builder</button>
+      <button class="tab-btn" data-tab-target="meta" type="button">Shop + Quests + Battle Log</button>
+    </nav>
+
+    <section class="tab-panel active" data-tab-panel="battle">
+    <section class="arena-wrap glass">
+      <canvas id="arena" width="1200" height="700" aria-label="Game arena"></canvas>
+      <div id="result" class="result hidden"></div>
+      <button id="startBattleBtn" class="start-battle">Start Battle</button>
+      <button id="restartBtn" class="restart hidden">Play Again</button>
+    </section>
+
+    <section class="controls glass">
+      <div class="elixir-panel">
+        <span class="label">Elixir</span>
+        <div class="meter"><div id="elixirFill"></div></div>
+        <strong id="elixirValue">5.0 / 10</strong>
+      </div>
+      <div id="cards" class="cards" aria-label="Cards"></div>
+      <p class="tip">Drag a card to the left side lanes to deploy (blue drop = valid, red = invalid).</p>
+    </section>
+    </section>
+
+    <section class="tab-panel" data-tab-panel="cards">
+    <section class="deck-builder glass">
+      <div class="deck-top">
+        <h2>Deck Builder + Upgrades</h2>
+        <button id="saveDeckBtn" class="deck-save-btn" type="button">Save Deck</button>
+      </div>
+      <div class="deck-search-wrap">
+        <input id="deckSearchInput" class="deck-search-input" type="text" placeholder="Search cards by name, rarity, or type..." autocomplete="off" />
+        <label for="deckSortSelect" style="margin-left: 0.5rem; font-weight: 700;">Sort by:</label>
+        <select id="deckSortSelect" style="margin-left: 0.25rem; border: 1px solid rgba(148,163,184,0.45); border-radius: 999px; background: rgba(15,23,42,0.78); color: #e2e8f0; padding: 0.1rem 0.45rem; font-size: 0.92rem;">
+          <option value="name">Name</option>
+          <option value="elixir">Elixir Cost</option>
+          <option value="rarity">Rarity</option>
+          <option value="type">Type</option>
+        </select>
+      </div>
+      <p id="deckStatus" class="deck-status">Build your deck, then drag cards to deploy.</p>
+      <h3>Your Deck (4 cards)</h3>
+      <div id="deckCards" class="deck-cards" aria-label="Deck slots"></div>
+      <h3>Collection</h3>
+      <div id="deckCollection" class="deck-collection" aria-label="Card collection"></div>
+    </section>
+    </section>
+
+    <section class="tab-panel" data-tab-panel="meta">
+    <section class="meta-grid">
+      <section class="glass panel">
+        <div class="panel-header">
+          <h3>Daily Quests</h3>
+          <button id="refreshQuestsBtn" class="small-btn" type="button">Refresh</button>
+        </div>
+        <div id="quests" class="quest-list"></div>
+      </section>
+
+      <section class="glass panel">
+        <div class="panel-header">
+          <h3>Card Shop</h3>
+          <button id="rerollShopBtn" class="small-btn" type="button">Reroll (25G)</button>
+        </div>
+        <div id="shopCards" class="shop-list"></div>
+      </section>
+
+      <section class="glass panel">
+        <h3>Battle Log</h3>
+        <ul id="battleLog" class="battle-log"></ul>
+      </section>
+    </section>
+    </section>
+  </main>
+
+  <div id="challengeModal" class="challenge-modal hidden" role="dialog" aria-modal="true" aria-labelledby="challengeTitle">
+    <div class="challenge-card glass">
+      <h2 id="challengeTitle">5-Win Streak Complete!</h2>
+      <p id="challengeMessage">You unlocked a Royal Chest. Open it to claim your reward.</p>
+      <div class="chest-art" aria-hidden="true">🧰</div>
+      <div class="challenge-actions">
+        <button id="openChestBtn" class="challenge-btn primary" type="button">Open Chest</button>
+        <button id="continueBtn" class="challenge-btn hidden" type="button">Back to Matches</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="cardInfoModal" class="card-info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cardInfoTitle">
+    <div class="card-info-panel glass">
+      <div class="card-info-head">
+        <h2 id="cardInfoTitle">Card Info</h2>
+        <button id="closeCardInfoBtn" class="challenge-btn" type="button">Close</button>
+      </div>
+      <div id="cardInfoBody" class="card-info-body"></div>
+    </div>
+  </div>
+
+  <audio id="bgm" loop preload="auto" src="royalty-instrumental.mp3"></audio>
+
+  <!-- Auth Modal for Multiplayer -->
+  <div id="authModal" class="auth-modal glass" role="dialog" aria-modal="true" style="display: none;">
+    <div class="auth-panel glass">
+      <h2 id="authTitle">Login</h2>
+      <div id="authForm"></div>
+      <div class="auth-toggle">
+        <span>Don't have an account? <button id="toggleAuthBtn" class="link-btn">Sign Up</button></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div id="leaderboardModal" class="leaderboard-modal glass hidden" role="dialog" aria-modal="true">
+    <div class="leaderboard-panel glass">
+      <div class="leaderboard-header">
+        <h2>🏆 Global Leaderboard</h2>
+        <button id="closeLeaderboardBtn" class="challenge-btn" onclick="document.getElementById('leaderboardModal').classList.add('hidden')">Close</button>
+      </div>
+      <div id="leaderboardContent" class="leaderboard-content"></div>
+    </div>
+  </div>
+
+  <!-- Online Players Sidebar -->
+  <div id="onlinePlayersSidebar" class="online-sidebar glass hidden">
+    <div class="sidebar-header">
+      <h3>⚔️ Online Players</h3>
+      <button class="close-btn" onclick="document.getElementById('onlinePlayersSidebar').classList.add('hidden')">✕</button>
+    </div>
+    <div id="onlinePlayersList" class="online-players-list"></div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="multiplayer.js"></script>
+</body>
+</html>
